@@ -1,4 +1,6 @@
-version: 2
+version: 2.1
+orbs:
+  aws-s3: circleci/aws-s3@1.0.11
 jobs:
   build:
     working_directory: /go/src/github.com/kevincloud/javaperks-auth-api
@@ -21,12 +23,10 @@ jobs:
           paths:
             - ~/.gocache
           key: gopkg-{{ .Branch }}-{{ checksum "authapi.go" }}
-      # - restore_cache:
-      #     keys:
-      #         - build-cache-{{ .Branch }}-{{ .Environment.CIRCLE_PREVIOUS_BUILD_NUM }}
-      #     paths:
-      #         - /tmp/go/cache
-      # - save_cache:
-      #     key: build-cache-{{ .Branch }}-{{ .Environment.CIRCLE_BUILD_NUM }}
-      #     paths:
-      #         - /tmp/go/cache
+      - store_artifacts:
+          path: javaperks-auth-api
+      - aws-s3/copy:
+          from: javaperks-auth-api
+          to: 's3://jubican-public/bin/javaperks-auth-api'
+          arguments: |
+            --acl public-read
