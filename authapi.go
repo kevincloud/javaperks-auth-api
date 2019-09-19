@@ -1,8 +1,6 @@
 package main
 
-import (
-	"./api"
-)
+import "github.com/kevincloud/javaperks-auth-api/api"
 
 func main() {
 	a := api.New("5825")
