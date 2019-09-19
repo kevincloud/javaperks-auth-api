@@ -10,7 +10,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: gopkg-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
+          key: gopkg-{{ .Branch }}-{{ checksum "authapi.go" }}
           paths:
               - /go/src/github.com/kevincloud/javaperks-auth-api/vendor
       - run:
@@ -22,7 +22,7 @@ jobs:
                 /go/bin/dep ensure
             fi
       - save_cache:
-          key: gopkg-{{ .Branch }}-{{ checksum "Gopkg.lock" }}
+          key: gopkg-{{ .Branch }}-{{ checksum "authapi.go" }}
           paths:
               - /go/src/github.com/kevincloud/javaperks-auth-api/vendor
       - restore_cache:
