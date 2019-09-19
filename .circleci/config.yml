@@ -11,8 +11,6 @@ jobs:
       - checkout
       - restore_cache:
           key: gopkg-{{ .Branch }}-{{ checksum "authapi.go" }}
-          paths:
-              - /go/src/github.com/kevincloud/javaperks-auth-api/vendor
       - run:
           name: Download libraries
           command: go get
@@ -21,14 +19,12 @@ jobs:
           command: go build -v
       - save_cache:
           key: gopkg-{{ .Branch }}-{{ checksum "authapi.go" }}
-          paths:
-              - /go/src/github.com/kevincloud/javaperks-auth-api/vendor
-      - restore_cache:
-          keys:
-              - build-cache-{{ .Branch }}-{{ .Environment.CIRCLE_PREVIOUS_BUILD_NUM }}
-          paths:
-              - /tmp/go/cache
-      - save_cache:
-          key: build-cache-{{ .Branch }}-{{ .Environment.CIRCLE_BUILD_NUM }}
-          paths:
-              - /tmp/go/cache
+      # - restore_cache:
+      #     keys:
+      #         - build-cache-{{ .Branch }}-{{ .Environment.CIRCLE_PREVIOUS_BUILD_NUM }}
+      #     paths:
+      #         - /tmp/go/cache
+      # - save_cache:
+      #     key: build-cache-{{ .Branch }}-{{ .Environment.CIRCLE_BUILD_NUM }}
+      #     paths:
+      #         - /tmp/go/cache
