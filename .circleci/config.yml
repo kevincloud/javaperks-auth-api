@@ -18,6 +18,8 @@ jobs:
           name: Build app
           command: go build -v
       - save_cache:
+          paths:
+            - ~/.gocache
           key: gopkg-{{ .Branch }}-{{ checksum "authapi.go" }}
       # - restore_cache:
       #     keys:
