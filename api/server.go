@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 
 	ldap "gopkg.in/ldap.v3"
@@ -37,7 +36,6 @@ type User struct {
 	Message    string `json:"message"`
 	Success    bool   `json:"success"`
 	Error      error  `json:"error"`
-	Info       string `json:"info"`
 }
 
 // VaultData : makes json payload usable
@@ -102,7 +100,7 @@ func (api API) Authenticate(w http.ResponseWriter, r *http.Request, p httprouter
 		"dc=javaperks,dc=local",
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
 		fmt.Sprintf("(&(objectClass=inetOrgPerson)(uid=%s))", username),
-		[]string{"dn"},
+		[]string{"dn", "uid", "employeeNumber"},
 		nil,
 	)
 
@@ -161,19 +159,12 @@ func (api API) Authenticate(w http.ResponseWriter, r *http.Request, p httprouter
 		return
 	}
 
-	info := ""
-
-	for i := range sr.Entries[0].Attributes {
-		info += sr.Entries[0].Attributes[i].Name + ": " + sr.Entries[0].Attributes[0].Values[0] + "\n"
-	}
-
 	j, _ := json.Marshal(User{
 		Username:   sr.Entries[0].GetAttributeValue("uid"),
 		Customerno: sr.Entries[0].GetAttributeValue("employeeNumber"),
 		Message:    "User successfully authenticated",
 		Success:    true,
 		Error:      err,
-		Info:       "Attrs: " + strconv.Itoa(len(sr.Entries[0].Attributes)) + "\n" + info,
 	})
 	fmt.Fprint(w, string(j))
 	return
