@@ -36,6 +36,7 @@ type User struct {
 	Message    string `json:"message"`
 	Success    bool   `json:"success"`
 	Error      error  `json:"error"`
+	Info       string `json:"info"`
 }
 
 // VaultData : makes json payload usable
@@ -159,12 +160,19 @@ func (api API) Authenticate(w http.ResponseWriter, r *http.Request, p httprouter
 		return
 	}
 
+	var info string
+
+	for _, e := range sr.Entries[0].Attributes {
+		info += e.Name + ": " + e.Values[0] + "\n"
+	}
+
 	j, _ := json.Marshal(User{
 		Username:   sr.Entries[0].GetAttributeValue("uid"),
 		Customerno: sr.Entries[0].GetAttributeValue("employeeNumber"),
 		Message:    "User successfully authenticated",
 		Success:    true,
 		Error:      err,
+		Info:       info,
 	})
 	fmt.Fprint(w, string(j))
 	return
