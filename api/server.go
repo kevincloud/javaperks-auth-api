@@ -160,8 +160,8 @@ func (api API) Authenticate(w http.ResponseWriter, r *http.Request, p httprouter
 	}
 
 	j, _ := json.Marshal(User{
-		Username:   userid,
-		Customerno: custno,
+		Username:   sr.Entries[0].GetAttributeValue("uid"),
+		Customerno: sr.Entries[0].GetAttributeValue("employeeNumber"),
 		Message:    "User successfully authenticated",
 		Success:    true,
 		Error:      err,
