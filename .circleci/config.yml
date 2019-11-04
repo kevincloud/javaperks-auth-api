@@ -26,6 +26,6 @@ jobs:
           path: javaperks-auth-api
       - aws-s3/copy:
           from: javaperks-auth-api
-          to: 's3://jubican-public/bin/javaperks-auth-api-1.1.3'
+          to: 's3://jubican-public/bin/javaperks-auth-api-1.1.4'
           arguments: |
             --acl public-read

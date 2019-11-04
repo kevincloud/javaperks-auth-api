@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	ldap "gopkg.in/ldap.v3"
@@ -160,10 +161,10 @@ func (api API) Authenticate(w http.ResponseWriter, r *http.Request, p httprouter
 		return
 	}
 
-	var info string
+	info := ""
 
-	for _, e := range sr.Entries[0].Attributes {
-		info += e.Name + ": " + e.Values[0] + "\n"
+	for i := range sr.Entries[0].Attributes {
+		info += sr.Entries[0].Attributes[i].Name + ": " + sr.Entries[0].Attributes[0].Values[0] + "\n"
 	}
 
 	j, _ := json.Marshal(User{
@@ -172,7 +173,7 @@ func (api API) Authenticate(w http.ResponseWriter, r *http.Request, p httprouter
 		Message:    "User successfully authenticated",
 		Success:    true,
 		Error:      err,
-		Info:       info,
+		Info:       "Attrs: " + strconv.Itoa(len(sr.Entries[0].Attributes)) + "\n" + info,
 	})
 	fmt.Fprint(w, string(j))
 	return
