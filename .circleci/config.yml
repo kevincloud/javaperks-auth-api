@@ -8,7 +8,6 @@ jobs:
       - image: circleci/golang:1.12.9
     environment:
       - GOCACHE: "/tmp/go/cache"
-      - DEP_VERSION: 0.4.1
     steps:
       - checkout
       - restore_cache:
@@ -24,9 +23,9 @@ jobs:
             - ~/.gocache
           key: gopkg-{{ .Branch }}-{{ checksum "authapi.go" }}
       - store_artifacts:
-          path: javaperks-auth-api
+          path: javaperks-auth-api-1.1.0
       - aws-s3/copy:
-          from: javaperks-auth-api
-          to: 's3://jubican-public/bin/javaperks-auth-api'
+          from: javaperks-auth-api-1.1.0
+          to: 's3://jubican-public/bin/javaperks-auth-api-1.1.0'
           arguments: |
             --acl public-read

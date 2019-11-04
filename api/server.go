@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+	ldap "gopkg.in/ldap.v3"
+
 	vault "github.com/hashicorp/vault/api"
 	"github.com/julienschmidt/httprouter"
 	"github.com/mitchellh/mapstructure"
@@ -19,9 +21,12 @@ var httpClient = &http.Client{
 
 // API : Service configuration
 type API struct {
-	Port       string
-	VaultAddr  string
-	VaultToken string
+	Port         string
+	VaultAddr    string
+	VaultToken   string
+	LdapHost     string
+	LdapAdmin    string
+	LdapPassword string
 }
 
 // User : The user data to be returned to the application
@@ -50,6 +55,121 @@ type VaultData struct {
 
 // Authenticate : authenticate the username/pass
 func (api API) Authenticate(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
+	w.Header().Set("Content-Type", "text/plain")
+
+	defer r.Body.Close()
+
+	r.ParseForm()
+
+	username := r.Form.Get("username")
+	password := r.Form.Get("password")
+
+	bindusername := api.LdapAdmin
+	bindpassword := api.LdapPassword
+
+	l, err := ldap.Dial("tcp", fmt.Sprintf("%s:%d", api.LdapHost, 389))
+	if err != nil {
+		j, _ := json.Marshal(User{
+			Username:   "",
+			Customerno: "",
+			Message:    "Couldn't connect to OpenLDAP",
+			Success:    false,
+			Error:      err,
+		})
+		fmt.Fprint(w, string(j))
+		return
+	}
+	defer l.Close()
+
+	err = l.Bind(bindusername, bindpassword)
+	if err != nil {
+		j, _ := json.Marshal(User{
+			Username:   "",
+			Customerno: "",
+			Message:    "Bad bind credentials",
+			Success:    false,
+			Error:      err,
+		})
+		fmt.Fprint(w, string(j))
+		return
+	}
+
+	searchRequest := ldap.NewSearchRequest(
+		"dc=javaperks,dc=local",
+		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
+		fmt.Sprintf("(&(objectClass=inetOrgPerson)(uid=%s))", username),
+		[]string{"dn"},
+		nil,
+	)
+
+	sr, err := l.Search(searchRequest)
+	if err != nil {
+		j, _ := json.Marshal(User{
+			Username:   "",
+			Customerno: "",
+			Message:    "There was an error searching the directory",
+			Success:    false,
+			Error:      err,
+		})
+		fmt.Fprint(w, string(j))
+		return
+	}
+
+	if len(sr.Entries) != 1 {
+		j, _ := json.Marshal(User{
+			Username:   "",
+			Customerno: "",
+			Message:    "Bad username/password",
+			Success:    false,
+			Error:      err,
+		})
+		fmt.Fprint(w, string(j))
+		return
+	}
+
+	userdn := sr.Entries[0].DN
+
+	err = l.Bind(userdn, password)
+	if err != nil {
+		j, _ := json.Marshal(User{
+			Username:   "",
+			Customerno: "",
+			Message:    "Bad username/password",
+			Success:    false,
+			Error:      err,
+		})
+		fmt.Fprint(w, string(j))
+		return
+	}
+
+	err = l.Bind(bindusername, bindpassword)
+	if err != nil {
+		j, _ := json.Marshal(User{
+			Username:   "",
+			Customerno: "",
+			Message:    "Error completing process",
+			Success:    false,
+			Error:      err,
+		})
+		fmt.Fprint(w, string(j))
+		return
+	}
+
+	j, _ := json.Marshal(User{
+		Username:   "",
+		Customerno: "",
+		Message:    "User successfully authenticated",
+		Success:    true,
+		Error:      err,
+	})
+	fmt.Fprint(w, string(j))
+	return
+}
+
+// Authenticate2 : authenticate the username/pass
+func (api API) Authenticate2(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST")
 	w.Header().Set("Content-Type", "text/plain")
@@ -125,9 +245,12 @@ func (api API) Run() {
 // New : Server setup
 func New(port string) *API {
 	api := &API{
-		Port:       port,
-		VaultAddr:  os.Getenv("VAULT_ADDR"),
-		VaultToken: os.Getenv("VAULT_TOKEN"),
+		Port:         port,
+		VaultAddr:    os.Getenv("VAULT_ADDR"),
+		VaultToken:   os.Getenv("VAULT_TOKEN"),
+		LdapHost:     os.Getenv("LDAP_HOST"),
+		LdapAdmin:    os.Getenv("LDAP_ADMIN"),
+		LdapPassword: os.Getenv("LDAP_PASSWORD"),
 	}
 
 	return api
