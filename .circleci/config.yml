@@ -23,9 +23,9 @@ jobs:
             - ~/.gocache
           key: gopkg-{{ .Branch }}-{{ checksum "authapi.go" }}
       - store_artifacts:
-          path: javaperks-auth-api-1.1.0
+          path: javaperks-auth-api-1.1.1
       - aws-s3/copy:
-          from: javaperks-auth-api-1.1.0
-          to: 's3://jubican-public/bin/javaperks-auth-api-1.1.0'
+          from: javaperks-auth-api-1.1.1
+          to: 's3://jubican-public/bin/javaperks-auth-api-1.1.1'
           arguments: |
             --acl public-read

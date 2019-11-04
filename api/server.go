@@ -130,12 +130,14 @@ func (api API) Authenticate(w http.ResponseWriter, r *http.Request, p httprouter
 	}
 
 	userdn := sr.Entries[0].DN
+	userid := sr.Entries[0].GetAttributeValue("uid")
+	custno := sr.Entries[0].GetAttributeValue("employeeNumber")
 
 	err = l.Bind(userdn, password)
 	if err != nil {
 		j, _ := json.Marshal(User{
-			Username:   "",
-			Customerno: "",
+			Username:   userid,
+			Customerno: custno,
 			Message:    "Bad username/password",
 			Success:    false,
 			Error:      err,
@@ -147,8 +149,8 @@ func (api API) Authenticate(w http.ResponseWriter, r *http.Request, p httprouter
 	err = l.Bind(bindusername, bindpassword)
 	if err != nil {
 		j, _ := json.Marshal(User{
-			Username:   "",
-			Customerno: "",
+			Username:   userid,
+			Customerno: custno,
 			Message:    "Error completing process",
 			Success:    false,
 			Error:      err,
@@ -158,8 +160,8 @@ func (api API) Authenticate(w http.ResponseWriter, r *http.Request, p httprouter
 	}
 
 	j, _ := json.Marshal(User{
-		Username:   "",
-		Customerno: "",
+		Username:   userid,
+		Customerno: custno,
 		Message:    "User successfully authenticated",
 		Success:    true,
 		Error:      err,
