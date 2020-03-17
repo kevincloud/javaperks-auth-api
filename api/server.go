@@ -53,7 +53,7 @@ type VaultData struct {
 	} `json:"metadata"`
 }
 
-// Authenticate : authenticate the username/pass
+// Authenticate : authenticate directly with ldap
 func (api API) Authenticate(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST")
@@ -169,6 +169,72 @@ func (api API) Authenticate(w http.ResponseWriter, r *http.Request, p httprouter
 	fmt.Fprint(w, string(j))
 	return
 }
+
+// // Authenticate3 : authenticate using vault auth ldap
+// func (api API) Authenticate3(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+// 	w.Header().Set("Access-Control-Allow-Origin", "*")
+// 	w.Header().Set("Access-Control-Allow-Methods", "POST")
+// 	w.Header().Set("Content-Type", "text/plain")
+
+// 	v := VaultData{}
+
+// 	defer r.Body.Close()
+
+// 	r.ParseForm()
+
+// 	username := r.Form.Get("username")
+// 	password := r.Form.Get("password")
+// 	vaultpath := fmt.Sprintf("auth/ldap/login/%s", username)
+
+// 	client, err := vault.NewClient(&vault.Config{Address: api.VaultAddr, HttpClient: httpClient})
+// 	if err != nil {
+// 		j, _ := json.Marshal(User{
+// 			Username:   "",
+// 			Customerno: "",
+// 			Message:    "Couldn't connect to Vault",
+// 			Success:    false,
+// 			Error:      err,
+// 		})
+// 		fmt.Fprint(w, string(j))
+// 		return
+// 	}
+// 	client.SetToken(api.VaultToken)
+// 	client.Auth
+// 	data, err := client.Logical().Read(vaultpath)
+// 	if err != nil {
+// 		j, _ := json.Marshal(User{
+// 			Username:   "",
+// 			Customerno: "",
+// 			Message:    "Vault secret path not found",
+// 			Success:    false,
+// 			Error:      err,
+// 		})
+// 		fmt.Fprint(w, string(j))
+// 		return
+// 	}
+
+// 	mapstructure.Decode(data.Data, &v)
+
+// 	if v.Data.Password == password {
+// 		j, _ := json.Marshal(User{
+// 			Username:   v.Data.Username,
+// 			Customerno: v.Data.Customerno,
+// 			Message:    "Authentication Successful",
+// 			Success:    true,
+// 			Error:      nil,
+// 		})
+// 		fmt.Fprint(w, string(j))
+// 	} else {
+// 		j, _ := json.Marshal(User{
+// 			Username:   "",
+// 			Customerno: "",
+// 			Message:    "Bad password",
+// 			Success:    false,
+// 			Error:      nil,
+// 		})
+// 		fmt.Fprint(w, string(j))
+// 	}
+// }
 
 // Authenticate2 : authenticate the username/pass
 func (api API) Authenticate2(w http.ResponseWriter, r *http.Request, p httprouter.Params) {

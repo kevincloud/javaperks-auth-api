@@ -18,14 +18,36 @@ jobs:
       - run:
           name: Build app
           command: go build -v
+      - run:
+        name: Load Docker image layer cache
+        command: |
+          set +o pipefail
+          docker load -i /caches/javaperks-auth-api.tar | true
+      - run:
+          name: Build application Docker image
+          command: |
+            docker build --cache-from=javaperks-auth-api -t jubican/javaperks-auth-api:1.1.6 .
+      - run:
+          name: Save Docker image layer cache
+          command: |
+            mkdir -p /caches
+            docker save -o /caches/javaperks-auth-api.tar jubican/javaperks-auth-api
       - save_cache:
-          paths:
-            - ~/.gocache
-          key: gopkg-{{ .Branch }}-{{ checksum "authapi.go" }}
+        paths:
+          - ~/.gocache
+        key: gopkg-{{ .Branch }}-{{ checksum "authapi.go" }}
       - store_artifacts:
           path: javaperks-auth-api
       - aws-s3/copy:
           from: javaperks-auth-api
-          to: 's3://jubican-public/bin/javaperks-auth-api-1.1.5'
+          to: 's3://jubican-public/bin/javaperks-auth-api-1.1.6'
           arguments: |
             --acl public-read
+      - deploy:
+        name: Push application Docker image
+        command: |
+          if [ "${CIRCLE_BRANCH}" == "master" ]; then
+            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+            docker push jubican/javaperks-auth-api:1.1.6
+          fi
+    
