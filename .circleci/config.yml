@@ -12,8 +12,7 @@ jobs:
       - checkout
       - setup_remote_docker
       - restore_cache:
-          keys: 
-            - gopkg-{{ .Branch }}-{{ checksum "authapi.go" }}
+          key: gopkg-{{ .Branch }}-{{ checksum "authapi.go" }}
           paths:
             - /caches/javaperks-auth-api.tar
       - run:
@@ -37,8 +36,7 @@ jobs:
             mkdir -p /caches
             docker save -o /caches/javaperks-auth-api.tar jubican/javaperks-auth-api
       - save_cache:
-          keys:
-            - gopkg-{{ .Branch }}-{{ checksum "authapi.go" }}
+          key: gopkg-{{ .Branch }}-{{ checksum "authapi.go" }}
           paths:
             - /caches/javaperks-auth-api.tar
       - store_artifacts:
