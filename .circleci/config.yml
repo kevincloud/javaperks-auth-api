@@ -22,7 +22,7 @@ jobs:
           name: Build app
           command: go build -v
       - store_artifacts:
-          path: /tmp/javaperks-auth-api
+          path: javaperks-auth-api
       - run:
           name: Load Docker image layer cache
           command: |
