@@ -21,6 +21,8 @@ jobs:
       - run:
           name: Build app
           command: go build -v
+      - store_artifacts:
+          path: /tmp/javaperks-auth-api
       - run:
           name: Load Docker image layer cache
           command: |
@@ -39,10 +41,8 @@ jobs:
           key: gopkg-{{ .Branch }}-{{ checksum "authapi.go" }}
           paths:
             - /caches/javaperks-auth-api.tar
-      - store_artifacts:
-          path: javaperks-auth-api
       - aws-s3/copy:
-          from: javaperks-auth-api
+          from: /tmp/javaperks-auth-api
           to: 's3://jubican-public/bin/javaperks-auth-api-1.1.6'
           arguments: |
             --acl public-read
