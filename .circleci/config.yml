@@ -27,7 +27,7 @@ jobs:
           name: Load Docker image layer cache
           command: |
             set +o pipefail
-            docker load -i /caches/javaperks-auth-api.tar | true
+            docker load -i caches/javaperks-auth-api.tar | true
       - run:
           name: Build application Docker image
           command: |
@@ -35,8 +35,8 @@ jobs:
       - run:
           name: Save Docker image layer cache
           command: |
-            mkdir -p /caches
-            docker save -o /caches/javaperks-auth-api.tar jubican/javaperks-auth-api
+            mkdir -p caches
+            docker save -o caches/javaperks-auth-api.tar jubican/javaperks-auth-api
       - save_cache:
           key: gopkg-{{ .Branch }}-{{ checksum "authapi.go" }}
           paths:
