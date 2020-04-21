@@ -9,4 +9,4 @@ ADD javaperks-auth-api /app/
 
 WORKDIR /app
 
-CMD [ "javaperks-auth-api" ]
+CMD [ "/app/javaperks-auth-api" ]
