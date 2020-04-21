@@ -6,6 +6,9 @@ RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y npm
 RUN mkdir /app
 ADD javaperks-auth-api /app/
+ADD bootstrap.sh /app/bootstrap.sh
+RUN chmod +x /app/bootstrap.sh
+RUN /app/bootstrap.sh
 
 WORKDIR /app
 
