@@ -31,7 +31,7 @@ jobs:
       - run:
           name: Build application Docker image
           command: |
-            docker build --cache-from=javaperks-auth-api -t jubican/javaperks-auth-api:1.1.6 .
+            docker build --cache-from=javaperks-auth-api -t jubican/javaperks-auth-api:1.1.7 .
       - run:
           name: Save Docker image layer cache
           command: |
@@ -43,7 +43,7 @@ jobs:
             - caches/javaperks-auth-api.tar
       - aws-s3/copy:
           from: javaperks-auth-api
-          to: 's3://jubican-public/bin/javaperks-auth-api-1.1.6'
+          to: 's3://jubican-public/bin/javaperks-auth-api-1.1.7'
           arguments: |
             --acl public-read
       - deploy:
@@ -51,5 +51,5 @@ jobs:
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
               echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-              docker push jubican/javaperks-auth-api:1.1.6
+              docker push jubican/javaperks-auth-api:1.1.7
             fi

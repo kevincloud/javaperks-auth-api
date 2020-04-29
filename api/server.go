@@ -27,6 +27,7 @@ type API struct {
 	LdapHost     string
 	LdapAdmin    string
 	LdapPassword string
+	Localhost    bool
 }
 
 // User : The user data to be returned to the application
@@ -303,7 +304,11 @@ func (api API) Authenticate2(w http.ResponseWriter, r *http.Request, p httproute
 
 // Run : Launch the thing
 func (api API) Run() {
-	apiPort := fmt.Sprintf(":%s", api.Port)
+	ipaddr := "0.0.0.0"
+	if api.Localhost {
+		ipaddr = "127.0.0.1"
+	}
+	apiPort := fmt.Sprintf("%s:%s", ipaddr, api.Port)
 	router := httprouter.New()
 
 	router.POST("/auth", api.Authenticate)
@@ -312,6 +317,9 @@ func (api API) Run() {
 
 // New : Server setup
 func New(port string) *API {
+	localhost := false
+	_, localhost = os.LookupEnv("LOCALHOST_ONLY")
+
 	api := &API{
 		Port:         port,
 		VaultAddr:    os.Getenv("VAULT_ADDR"),
@@ -319,6 +327,7 @@ func New(port string) *API {
 		LdapHost:     os.Getenv("LDAP_HOST"),
 		LdapAdmin:    os.Getenv("LDAP_ADMIN"),
 		LdapPassword: os.Getenv("LDAP_PASSWORD"),
+		Localhost:    localhost,
 	}
 
 	return api
