@@ -72,6 +72,7 @@ func (api API) Authenticate(w http.ResponseWriter, r *http.Request, p httprouter
 
 	l, err := ldap.Dial("tcp", fmt.Sprintf("%s:%d", api.LdapHost, 389))
 	if err != nil {
+		log.Println("Couldn't connect to OpenLDAP")
 		j, _ := json.Marshal(User{
 			Username:   "",
 			Customerno: "",
@@ -86,6 +87,7 @@ func (api API) Authenticate(w http.ResponseWriter, r *http.Request, p httprouter
 
 	err = l.Bind(bindusername, bindpassword)
 	if err != nil {
+		log.Println("Bad bind credentials")
 		j, _ := json.Marshal(User{
 			Username:   "",
 			Customerno: "",
@@ -107,6 +109,7 @@ func (api API) Authenticate(w http.ResponseWriter, r *http.Request, p httprouter
 
 	sr, err := l.Search(searchRequest)
 	if err != nil {
+		log.Println("There was an error searching the directory")
 		j, _ := json.Marshal(User{
 			Username:   "",
 			Customerno: "",
@@ -119,6 +122,7 @@ func (api API) Authenticate(w http.ResponseWriter, r *http.Request, p httprouter
 	}
 
 	if len(sr.Entries) != 1 {
+		log.Println("User not located in directory")
 		j, _ := json.Marshal(User{
 			Username:   "",
 			Customerno: "",
@@ -136,6 +140,7 @@ func (api API) Authenticate(w http.ResponseWriter, r *http.Request, p httprouter
 
 	err = l.Bind(userdn, password)
 	if err != nil {
+		log.Println("Bad password")
 		j, _ := json.Marshal(User{
 			Username:   userid,
 			Customerno: custno,
@@ -146,9 +151,11 @@ func (api API) Authenticate(w http.ResponseWriter, r *http.Request, p httprouter
 		fmt.Fprint(w, string(j))
 		return
 	}
+	log.Println("User " + username + " successfully authenticated")
 
 	err = l.Bind(bindusername, bindpassword)
 	if err != nil {
+		log.Println("Bad bind credentials")
 		j, _ := json.Marshal(User{
 			Username:   userid,
 			Customerno: custno,
@@ -309,6 +316,7 @@ func (api API) Run() {
 		ipaddr = "127.0.0.1"
 	}
 	apiPort := fmt.Sprintf("%s:%s", ipaddr, api.Port)
+	log.Println("Started auth-api, listening on " + apiPort)
 	router := httprouter.New()
 
 	router.POST("/auth", api.Authenticate)
