@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"time"
 
-	ldap "gopkg.in/ldap.v3"
+	ldap "github.com/go-ldap/ldap/v3"
 
 	vault "github.com/hashicorp/vault/api"
 	"github.com/julienschmidt/httprouter"
