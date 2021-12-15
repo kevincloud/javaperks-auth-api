@@ -41,6 +41,11 @@ jobs:
           key: gopkg-{{ .Branch }}-{{ checksum "authapi.go" }}
           paths:
             - caches/javaperks-auth-api.tar
+      - aws-s3/copy:
+          from: javaperks-auth-api
+          to: 's3://jubican-public/bin/javaperks-auth-api-1.1.10'
+          arguments: |
+            --acl public-read
       - deploy:
           name: Push application Docker image
           command: |
