@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	ldap "gopkg.in/ldap.v3"
@@ -312,9 +313,9 @@ func (api API) Authenticate2(w http.ResponseWriter, r *http.Request, p httproute
 // Run : Launch the thing
 func (api API) Run() {
 	ipaddr := "0.0.0.0"
-	// if api.Localhost {
-	// 	ipaddr = "127.0.0.1"
-	// }
+	if api.Localhost {
+		ipaddr = "127.0.0.1"
+	}
 	apiPort := fmt.Sprintf("%s:%s", ipaddr, api.Port)
 	log.Println("Started auth-api, listening on " + apiPort)
 	router := httprouter.New()
@@ -326,7 +327,10 @@ func (api API) Run() {
 // New : Server setup
 func New(port string) *API {
 	localhost := false
-	_, localhost = os.LookupEnv("LOCALHOST_ONLY")
+	s, t := os.LookupEnv("LOCALHOST_ONLY")
+	if t {
+		localhost, _ = strconv.ParseBool(s)
+	}
 
 	api := &API{
 		Port:         port,
