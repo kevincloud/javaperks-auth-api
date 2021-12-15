@@ -5,7 +5,7 @@ jobs:
   build:
     working_directory: /go/src/github.com/kevincloud/javaperks-auth-api
     docker:
-      - image: circleci/golang:latest
+      - image: circleci/golang:stretch
     environment:
       - GOCACHE: "/tmp/go/cache"
     steps:
