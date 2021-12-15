@@ -17,9 +17,7 @@ jobs:
             - caches/javaperks-auth-api.tar
       - run:
           name: Download libraries
-          command: |
-            cd /go/src/github.com/kevincloud/javaperks-auth-api
-            go get
+          command: go mod init
       - run:
           name: Build app
           command: go build -v
